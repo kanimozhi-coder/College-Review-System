@@ -4,12 +4,14 @@ import morgan from "morgan";
 import connectDB from "./config/db.js";
 import CollegeModel from "./models/college.js";
 import authRoute from "./routes/authRoutes.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
 app.use(express.json());
 app.use(morgan("dev"));
+app.use(cookieParser());
 
 app.use("/api/auth", authRoute);
 

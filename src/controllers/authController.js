@@ -1,6 +1,7 @@
-import { decrypt } from "dotenv";
 import UserModel from "../models/user.js";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import cookieParser from "cookie-parser";
 
 export const registerHandler = async function (req, res) {
   try {
@@ -25,10 +26,49 @@ export const registerHandler = async function (req, res) {
       role: req.body.role,
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "user registration successfully",
       createUser,
     });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const loginHandler = async function (req, res) {
+  try {
+    const existingUser = await UserModel.findOne({ email: req.body.email });
+
+    if (!existingUser) {
+      return res.status(403).json({
+        message: "please register first",
+      });
+    }
+
+    const isPasswordValid = await bcrypt.compare(req.body.password, existingUser.password);
+
+    if (!isPasswordValid) {
+      return res.status(403).json({
+        message: "invalid email or password",
+      });
+    }
+
+    const token = jwt.sign({ userId: existingUser._id, role: existingUser.role }, process.env.JWT_SECRETKEY, {
+      expiresIn: "1d",
+    });
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "login success",
+    });
+    console.log("isPasswordValid", isPasswordValid);
   } catch (error) {
     console.log(error);
   }
