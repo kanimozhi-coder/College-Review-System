@@ -99,3 +99,43 @@ export const deleteCollege = async function (req, res) {
     console.log(error);
   }
 };
+
+export const getCollegesWithRatings = async (req, res) => {
+  try {
+    const colleges = await CollegeModel.aggregate([
+      {
+        $lookup: {
+          from: "reviews",
+          localField: "_id",
+          foreignField: "college",
+          as: "reviews",
+        },
+      },
+      {
+        $addFields: {
+          averageRating: {
+            $cond: [{ $gt: [{ $size: "$reviews" }, 0] }, { $avg: "$reviews.rating" }, 0],
+          },
+          reviewCount: {
+            $size: "$reviews",
+          },
+        },
+      },
+      {
+        $project: {
+          reviews: 0,
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      message: "College with rating success",
+      colleges,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
