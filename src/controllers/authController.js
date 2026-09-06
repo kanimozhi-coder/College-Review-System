@@ -68,7 +68,19 @@ export const loginHandler = async function (req, res) {
       success: true,
       message: "login success",
     });
-    console.log("isPasswordValid", isPasswordValid);
+    // console.log("isPasswordValid", isPasswordValid);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const logoutHandler = async (req, res) => {
+  try {
+    res.clearCookie("token");
+
+    res.json({
+      message: "Logged out successfully",
+    });
   } catch (error) {
     console.log(error);
   }
