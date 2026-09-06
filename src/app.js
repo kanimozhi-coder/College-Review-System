@@ -11,10 +11,12 @@ import reviewRoute from "./routes/reviewRoute.js";
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+// middlewares
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(cookieParser());
 
+// Routes
 app.use("/api/auth", authRoute);
 app.use("/api/", collegeRoute);
 app.use("/api", reviewRoute);
